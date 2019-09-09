@@ -1,0 +1,1584 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import seaborn as sns\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn import datasets\n",
+    "import matplotlib.pyplot as plt\n",
+    "from scipy.stats import norm\n",
+    "from scipy import stats\n",
+    "from matplotlib.pyplot import plot\n",
+    "import pylab\n",
+    "import statsmodels.api as sm\n",
+    "import statsmodels.stats.api as sms\n",
+    "from scipy.stats import shapiro"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# one sample t-test"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "olcumler = np.array([17, 160, 234, 149, 145, 107, 197, 75, 201, 225, 211, 119, \n",
+    "               157, 145, 127, 244, 163, 114, 145,  65, 112, 185, 202, 146,\n",
+    "               203, 224, 203, 114, 188, 156, 187, 154, 177, 95, 165, 50, 110, \n",
+    "       216, 138, 151, 166, 135, 155, 84, 251, 173, 131, 207, 121, 120])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Statistics = 0.985, P=0.785\n"
+     ]
+    }
+   ],
+   "source": [
+    "stat, p = shapiro(olcumler) # verilerin normal dağılım olup olmadığını test eder.\n",
+    "print('Statistics = %.3f, P=%.3f' % (stat, p))\n",
+    "# p value alpha ile kıyaslanır. alpha'dan büyük olması fail to reject.\n",
+    "# stat değeri alanı veren noktadır."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Fail to recejt! - Örneklem normal dağılımdan gelmektedir.\n"
+     ]
+    }
+   ],
+   "source": [
+    "alpha = 0.05\n",
+    "if p > alpha:\n",
+    "    print(\"Fail to recejt! - Örneklem normal dağılımdan gelmektedir.\")\n",
+    "else:\n",
+    "    print(\"Reject! - Örneklerm normal dağılımdan gelmemektedir.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Ttest_1sampResult(statistic=-2.1753117985877966, pvalue=0.034460415195071446)"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# one sample t-test\n",
+    "\n",
+    "stats.ttest_1samp(olcumler, popmean=170)\n",
+    "# hipotezim ortalamanın 170 olup olmadığı.\n",
+    "# h0 > M0 = 170\n",
+    "# h1 > M1 != 170\n",
+    "# alpha 0.05 (%95 güven aralığı) ve test çift taraflı olduğu için grafiğin 0.025 ve 0.975 aralığı fail to reject aralığı oluyor. \n",
+    "# p değeri 0.0344 < 0.05 olduğu için hipotezimi 'reject' ediyorum ve %95 güven aralığında M0 != 170'dir diyorum.\n",
+    "# alpha = 0.1 (%90 güven aralığı) olsaydı fail to reject alanım daralacaktı.\n",
+    "# alpha = 0.01 (%99 güven aralığında) "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "-2.0095752344892093"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "stats.t.ppf(q=0.025, df = len(olcumler)-1) # alpha = 0.05 yani %95lik güven aralığındaki t değerim nedir?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.034460415195071446"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "stats.t.cdf(x=-2.1753117985877966, df = len(olcumler)-1)*2 # 2 taraflı olduğu için 2 ile çarpılır."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(139.95008462736266, 168.80991537263733)"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sms.DescrStatsW(olcumler).tconfint_mean() # güven aralığının bulunması"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# farklı veri gruplarının karşılaştırılması"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "A = pd.DataFrame([30,27,21,27,29,30,20,20,27,32,35,22,24,23,25,27,23,27,23,25,21,18,24,26,33,26,27,28,19,25])\n",
+    "  \n",
+    "B = pd.DataFrame([37,39,31,31,34,38,30,36,29,28,38,28,37,37,30,32,31,31,27,32,33,33,33,31,32,33,26,32,33,29])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Kadın</th>\n",
+       "      <th>Erkek</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>30</td>\n",
+       "      <td>37</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>27</td>\n",
+       "      <td>39</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>21</td>\n",
+       "      <td>31</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>27</td>\n",
+       "      <td>31</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>29</td>\n",
+       "      <td>34</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Kadın  Erkek\n",
+       "0     30     37\n",
+       "1     27     39\n",
+       "2     21     31\n",
+       "3     27     31\n",
+       "4     29     34"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "A_B = pd.concat([A, B], axis = 1)\n",
+    "A_B.columns = [\"Kadın\", \"Erkek\"]\n",
+    "A_B.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>0</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>30</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>21</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>29</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    0  0\n",
+       "0  30  A\n",
+       "1  27  A\n",
+       "2  21  A\n",
+       "3  27  A\n",
+       "4  29  A"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "GRUP_A = np.arange(len(A))\n",
+    "GRUP_A = pd.DataFrame(GRUP_A)\n",
+    "GRUP_A[:]= \"A\"\n",
+    "A = pd.concat([A, GRUP_A], axis=1)\n",
+    "A.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>0</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>37</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>39</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>31</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>31</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>34</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    0  0\n",
+       "0  37  B\n",
+       "1  39  B\n",
+       "2  31  B\n",
+       "3  31  B\n",
+       "4  34  B"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "GRUP_B = np.arange(len(B))\n",
+    "GRUP_B = pd.DataFrame(GRUP_B)\n",
+    "GRUP_B[:]= \"B\"\n",
+    "B = pd.concat([B, GRUP_B], axis=1)\n",
+    "B.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Gelir</th>\n",
+       "      <th>Grup</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>30</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>21</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>29</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>30</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>20</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>20</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>32</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>10</th>\n",
+       "      <td>35</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>11</th>\n",
+       "      <td>22</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>12</th>\n",
+       "      <td>24</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>13</th>\n",
+       "      <td>23</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>14</th>\n",
+       "      <td>25</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>15</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>16</th>\n",
+       "      <td>23</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>17</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>18</th>\n",
+       "      <td>23</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>19</th>\n",
+       "      <td>25</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>20</th>\n",
+       "      <td>21</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>21</th>\n",
+       "      <td>18</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>22</th>\n",
+       "      <td>24</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>23</th>\n",
+       "      <td>26</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>24</th>\n",
+       "      <td>33</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25</th>\n",
+       "      <td>26</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>26</th>\n",
+       "      <td>27</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>27</th>\n",
+       "      <td>28</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>28</th>\n",
+       "      <td>19</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>29</th>\n",
+       "      <td>25</td>\n",
+       "      <td>A</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>37</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>39</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>31</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>31</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>34</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>38</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>30</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>36</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>29</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>28</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>10</th>\n",
+       "      <td>38</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>11</th>\n",
+       "      <td>28</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>12</th>\n",
+       "      <td>37</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>13</th>\n",
+       "      <td>37</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>14</th>\n",
+       "      <td>30</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>15</th>\n",
+       "      <td>32</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>16</th>\n",
+       "      <td>31</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>17</th>\n",
+       "      <td>31</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>18</th>\n",
+       "      <td>27</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>19</th>\n",
+       "      <td>32</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>20</th>\n",
+       "      <td>33</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>21</th>\n",
+       "      <td>33</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>22</th>\n",
+       "      <td>33</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>23</th>\n",
+       "      <td>31</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>24</th>\n",
+       "      <td>32</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25</th>\n",
+       "      <td>33</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>26</th>\n",
+       "      <td>26</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>27</th>\n",
+       "      <td>32</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>28</th>\n",
+       "      <td>33</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>29</th>\n",
+       "      <td>29</td>\n",
+       "      <td>B</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    Gelir Grup\n",
+       "0      30    A\n",
+       "1      27    A\n",
+       "2      21    A\n",
+       "3      27    A\n",
+       "4      29    A\n",
+       "5      30    A\n",
+       "6      20    A\n",
+       "7      20    A\n",
+       "8      27    A\n",
+       "9      32    A\n",
+       "10     35    A\n",
+       "11     22    A\n",
+       "12     24    A\n",
+       "13     23    A\n",
+       "14     25    A\n",
+       "15     27    A\n",
+       "16     23    A\n",
+       "17     27    A\n",
+       "18     23    A\n",
+       "19     25    A\n",
+       "20     21    A\n",
+       "21     18    A\n",
+       "22     24    A\n",
+       "23     26    A\n",
+       "24     33    A\n",
+       "25     26    A\n",
+       "26     27    A\n",
+       "27     28    A\n",
+       "28     19    A\n",
+       "29     25    A\n",
+       "0      37    B\n",
+       "1      39    B\n",
+       "2      31    B\n",
+       "3      31    B\n",
+       "4      34    B\n",
+       "5      38    B\n",
+       "6      30    B\n",
+       "7      36    B\n",
+       "8      29    B\n",
+       "9      28    B\n",
+       "10     38    B\n",
+       "11     28    B\n",
+       "12     37    B\n",
+       "13     37    B\n",
+       "14     30    B\n",
+       "15     32    B\n",
+       "16     31    B\n",
+       "17     31    B\n",
+       "18     27    B\n",
+       "19     32    B\n",
+       "20     33    B\n",
+       "21     33    B\n",
+       "22     33    B\n",
+       "23     31    B\n",
+       "24     32    B\n",
+       "25     33    B\n",
+       "26     26    B\n",
+       "27     32    B\n",
+       "28     33    B\n",
+       "29     29    B"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "AB = pd.concat([A,B])\n",
+    "AB.columns = [\"Gelir\", \"Grup\"]\n",
+    "AB"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<matplotlib.axes._subplots.AxesSubplot at 0x2b17e9b7ef0>"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "sns.boxplot(x='Grup', y='Gelir', data = AB)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<matplotlib.axes._subplots.AxesSubplot at 0x2b17ed43eb8>"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "sns.violinplot(x='Grup', y='Gelir', data = AB)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(0.9789242148399353, 0.7962799668312073)"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "shapiro(A_B.Kadın) # verinin normal dağılım sahip olup olmadığını test ediyorum.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(0.9561260342597961, 0.24584221839904785)"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "shapiro(A_B.Erkek) # verinin normal dağılım sahip olup olmadığını test ediyorum."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "LeveneResult(statistic=1.1101802757158004, pvalue=0.2964124900636569)"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "stats.levene(A_B.Kadın, A_B.Erkek) # p value = 0.29 > alpha olduğu için hipotezimi 'fail to reject' yani kabul ediyorum \n",
+    "# varyansın yakın olması verilerin aynı dağılıma sahip olduğunu ifade eder."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Ttest_indResult(statistic=-7.028690967745927, pvalue=2.6233215605475075e-09)"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "stats.ttest_ind(A_B[\"Kadın\"], A_B[\"Erkek\"], equal_var = True) # varyansın aynı olduğunu söyleyerek t test yaptık \n",
+    "# p değeri alpha'dan küçük olduğu için reject ediyorum.\n",
+    "# test sonucunda göre iki veri seti arasında anlamlı bir fark vardır."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# aynı kişilerin öncesi ve sonrası durumlarının kıyaslanması"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "oncesi = pd.DataFrame([123,119,119,116,123,123,121,120,117,118,121,121,123,119,121,118,124,121,125,115,115,119,118,121,117,117,120,120,121,117,118,117,123,118,124,121,115,118,125,115])\n",
+    "sonrasi = pd.DataFrame([118,127,122,132,129,123,129,132,128,130,128,138,140,130,134,134,124,140,134,129,129,138,134,124,122,126,133,127,130,130,130,132,117,130,125,129,133,120,127,123])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "grup_oncesi = np.arange(len(oncesi))\n",
+    "grup_oncesi = pd.DataFrame(grup_oncesi)\n",
+    "grup_oncesi[:] = 'oncesi'\n",
+    "A = pd.concat([oncesi, grup_oncesi], axis = 1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "grup_sonrasi = np.arange(len(sonrasi))\n",
+    "grup_sonrasi = pd.DataFrame(grup_sonrasi)\n",
+    "grup_sonrasi[:] = 'sonrasi'\n",
+    "B = pd.concat([sonrasi, grup_sonrasi], axis = 1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>skor</th>\n",
+       "      <th>oncesi_sonrasi</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>123</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>119</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>119</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>116</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>123</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>123</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>121</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>120</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>117</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>118</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>10</th>\n",
+       "      <td>121</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>11</th>\n",
+       "      <td>121</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>12</th>\n",
+       "      <td>123</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>13</th>\n",
+       "      <td>119</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>14</th>\n",
+       "      <td>121</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>15</th>\n",
+       "      <td>118</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>16</th>\n",
+       "      <td>124</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>17</th>\n",
+       "      <td>121</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>18</th>\n",
+       "      <td>125</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>19</th>\n",
+       "      <td>115</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>20</th>\n",
+       "      <td>115</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>21</th>\n",
+       "      <td>119</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>22</th>\n",
+       "      <td>118</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>23</th>\n",
+       "      <td>121</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>24</th>\n",
+       "      <td>117</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25</th>\n",
+       "      <td>117</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>26</th>\n",
+       "      <td>120</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>27</th>\n",
+       "      <td>120</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>28</th>\n",
+       "      <td>121</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>29</th>\n",
+       "      <td>117</td>\n",
+       "      <td>oncesi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>10</th>\n",
+       "      <td>128</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>11</th>\n",
+       "      <td>138</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>12</th>\n",
+       "      <td>140</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>13</th>\n",
+       "      <td>130</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>14</th>\n",
+       "      <td>134</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>15</th>\n",
+       "      <td>134</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>16</th>\n",
+       "      <td>124</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>17</th>\n",
+       "      <td>140</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>18</th>\n",
+       "      <td>134</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>19</th>\n",
+       "      <td>129</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>20</th>\n",
+       "      <td>129</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>21</th>\n",
+       "      <td>138</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>22</th>\n",
+       "      <td>134</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>23</th>\n",
+       "      <td>124</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>24</th>\n",
+       "      <td>122</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25</th>\n",
+       "      <td>126</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>26</th>\n",
+       "      <td>133</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>27</th>\n",
+       "      <td>127</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>28</th>\n",
+       "      <td>130</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>29</th>\n",
+       "      <td>130</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>30</th>\n",
+       "      <td>130</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>31</th>\n",
+       "      <td>132</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>32</th>\n",
+       "      <td>117</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>33</th>\n",
+       "      <td>130</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>34</th>\n",
+       "      <td>125</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>35</th>\n",
+       "      <td>129</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>36</th>\n",
+       "      <td>133</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>37</th>\n",
+       "      <td>120</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>38</th>\n",
+       "      <td>127</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>39</th>\n",
+       "      <td>123</td>\n",
+       "      <td>sonrasi</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>80 rows × 2 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    skor oncesi_sonrasi\n",
+       "0    123         oncesi\n",
+       "1    119         oncesi\n",
+       "2    119         oncesi\n",
+       "3    116         oncesi\n",
+       "4    123         oncesi\n",
+       "..   ...            ...\n",
+       "35   129        sonrasi\n",
+       "36   133        sonrasi\n",
+       "37   120        sonrasi\n",
+       "38   127        sonrasi\n",
+       "39   123        sonrasi\n",
+       "\n",
+       "[80 rows x 2 columns]"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "AB = pd.concat([A, B])\n",
+    "AB.columns = ['skor', 'oncesi_sonrasi']\n",
+    "AB"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<matplotlib.axes._subplots.AxesSubplot at 0x2b17edc0860>"
+      ]
+     },
+     "execution_count": 24,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "sns.boxplot(x= 'oncesi_sonrasi', y='skor', data = AB)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "birlikte = pd.concat([oncesi, sonrasi], axis =1)\n",
+    "birlikte.columns = ['oncesi', 'sonrasi']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Fail to recejt! - Örneklem normal dağılımdan gelmektedir.\n"
+     ]
+    }
+   ],
+   "source": [
+    "stat1, p1 = shapiro(birlikte.oncesi) # sonuçtaki iki değer test statistics and p value. p value > 0.05 olduğu için fail to reject\n",
+    "alpha = 0.05\n",
+    "if p1 > alpha:\n",
+    "    print(\"Fail to recejt! - Örneklem normal dağılımdan gelmektedir.\")\n",
+    "else:\n",
+    "    print(\"Reject! - Örneklerm normal dağılımdan gelmemektedir.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Fail to recejt! - Örneklem normal dağılımdan gelmektedir.\n"
+     ]
+    }
+   ],
+   "source": [
+    "stat2, p2 = shapiro(birlikte.sonrasi)\n",
+    "alpha = 0.05\n",
+    "if p2 > alpha:\n",
+    "    print(\"Fail to recejt! - Örneklem normal dağılımdan gelmektedir.\")\n",
+    "else:\n",
+    "    print(\"Reject! - Örneklerm normal dağılımdan gelmemektedir.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Alanı veren nokta : 8.31303288672351, p value (alan) : 0.0050844511807370246 \n",
+      "Reject! - Örneklerm sabit varyansa sahip değildir.\n"
+     ]
+    }
+   ],
+   "source": [
+    "stat, p = stats.levene(birlikte.oncesi, birlikte.sonrasi)\n",
+    "alpha = 0.05\n",
+    "print(\"Alanı veren nokta : {}, p value (alan) : {} \".format(stat, p))\n",
+    "if p > alpha:\n",
+    "    print(\"Fail to recejt! - Örneklem sabit varyansa sahiptir.\")\n",
+    "else:\n",
+    "    print(\"Reject! - Örneklerm sabit varyansa sahip değildir.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Ttest_relResult(statistic=-9.281533480429937, pvalue=2.0235251764440722e-11)"
+      ]
+     },
+     "execution_count": 33,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "stat, p = stats.ttest_rel(birlikte.oncesi, birlikte.sonrasi)\n",
+    "alpha = 0.05\n",
+    "print(\"Alanı veren nokta : {}, p value (alan) : {} \".format(stat, p))\n",
+    "if p > alpha:\n",
+    "    print(\"Fail to recejt! - Verilerin birbireriyle ilişkisi vardır.\")\n",
+    "else:\n",
+    "    print(\"Reject! - Verilerin birbireriyle ilişkisi yoktur.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# ANOVA"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "anova = analysis of variance \n",
+    "ikiden fazla grup sayısı için anova kullanılır.\n",
+    "F-statistic : variance between groups / variance within groups\n",
+    "F-statistic de alpha ile kıyaslanır.\n",
+    "F-statistic verisi için de tablo vardır. Tabloda veri sayısı -1 ve karşılaştırılacak grup sayısı -1 ile değerler bulunur."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
